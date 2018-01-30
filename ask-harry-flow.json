@@ -1,0 +1,242 @@
+[
+    {
+        "id": "c6d98d64.950d18",
+        "type": "http in",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "url": "/input",
+        "method": "get",
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "63b91d28.f251ec"
+            ]
+        ]
+    },
+    {
+        "id": "63b91d28.f251ec",
+        "type": "template",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<html>\n    <form action='/watson'>\n        <input type='text' name='query'>\n        <input type='submit'>\n    </form>\n</html>",
+        "x": 310,
+        "y": 100,
+        "wires": [
+            [
+                "319d0d9b.d3b80a"
+            ]
+        ]
+    },
+    {
+        "id": "319d0d9b.d3b80a",
+        "type": "http response",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "x": 490,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "570b267f.a2b14",
+        "type": "http in",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "url": "/watson",
+        "method": "get",
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 220,
+        "wires": [
+            [
+                "6ca4cb15.7f0914"
+            ]
+        ]
+    },
+    {
+        "id": "6ca4cb15.7f0914",
+        "type": "function",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "func": "msg.payload = msg.req.query.query\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 310,
+        "y": 220,
+        "wires": [
+            [
+                "d4a00932.1802"
+            ]
+        ]
+    },
+    {
+        "id": "d4a00932.1802",
+        "type": "watson-conversation-v1",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "workspaceid": "",
+        "multiuser": false,
+        "context": true,
+        "empty-payload": false,
+        "default-endpoint": false,
+        "service-endpoint": "",
+        "x": 490,
+        "y": 220,
+        "wires": [
+            [
+                "f0cab29a.87155"
+            ]
+        ]
+    },
+    {
+        "id": "f0cab29a.87155",
+        "type": "function",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "func": "msg.payload = msg.payload.output.text.toString();\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 150,
+        "y": 300,
+        "wires": [
+            [
+                "7744a27c.c76004"
+            ]
+        ]
+    },
+    {
+        "id": "b71dc7b1.abc638",
+        "type": "function",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "func": "msg.payload = msg.speech;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 530,
+        "y": 300,
+        "wires": [
+            [
+                "88f0a8a6.18cd7"
+            ]
+        ]
+    },
+    {
+        "id": "88f0a8a6.18cd7",
+        "type": "websocket out",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "server": "ffe87ec2.90616",
+        "client": "",
+        "x": 440,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "8dc847b.b856bb8",
+        "type": "http in",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "url": "/audio",
+        "method": "get",
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 520,
+        "wires": [
+            [
+                "3ca52b7c.e0e60c"
+            ]
+        ]
+    },
+    {
+        "id": "3ca52b7c.e0e60c",
+        "type": "template",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n  <html>\n  <head>\n  <title>IBM Watson - Text To Speech</title>\n  <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js\"></script>\n  \n  <script type=\"text/javascript\">\n              var socketaddy = \"wss://\" + window.location.host + \"/ws/audio\";\n             $(document).ready(function(){\n              var output = document.getElementById('output')\n              $('#output').on('playing', function () {\n              $('#text').text('Playing audio.')\n  \n              });\n              $('#output').on('ended', function () {\n              $('#text').text('Waiting for audio...')\n  \n              });\n              sock = new WebSocket(socketaddy);\n              sock.onopen = function(){\n              $('#text').text('Waiting for audio...');\n              console.log(\"Connected websocket\");\n              };\n              sock.onerror = function(){ \n              console.log(\"Websocket error\"); \n              };\n              sock.onclose = function () {\n              $('#text').text('Not connected. Refresh the page?')\n              }\n              sock.onmessage = function(evt){\n              console.log(\"Websocket message\", evt); \n              output.src = window.URL.createObjectURL(evt.data);\n              output.play();\n              };\n              });\n  </script>\n  \n  </head>\n  <body style=\"font-size: 56px; font-family: helvetica; text-align: center; margin-top: 100px;\">\n  <div id=\"text\">Connecting...</div>\n  <audio id=\"output\"></audio>\n  </body>\n  </html>    ",
+        "x": 310,
+        "y": 520,
+        "wires": [
+            [
+                "f321b3ee.e87198"
+            ]
+        ]
+    },
+    {
+        "id": "f321b3ee.e87198",
+        "type": "http response",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "x": 510,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "7744a27c.c76004",
+        "type": "watson-text-to-speech",
+        "z": "621c39a4.213c9",
+        "name": "",
+        "lang": "en-US",
+        "langhidden": "en-US",
+        "langcustomhidden": "",
+        "voice": "en-US_MichaelVoice",
+        "voicehidden": "en-US_MichaelVoice",
+        "format": "audio/wav",
+        "password": "",
+        "payload-response": false,
+        "default-endpoint": false,
+        "service-endpoint": "",
+        "x": 340,
+        "y": 300,
+        "wires": [
+            [
+                "b71dc7b1.abc638"
+            ]
+        ]
+    },
+    {
+        "id": "776cf0aa.3a46d",
+        "type": "comment",
+        "z": "621c39a4.213c9",
+        "name": "Simple input page to allow the user ask questions ",
+        "info": "",
+        "x": 250,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "80d1c32d.1dac18",
+        "type": "comment",
+        "z": "621c39a4.213c9",
+        "name": "Pass queries to Watson Conversation & replies to the browser ",
+        "info": "",
+        "x": 278.5,
+        "y": 178.75,
+        "wires": []
+    },
+    {
+        "id": "24c843d2.eb9334",
+        "type": "comment",
+        "z": "621c39a4.213c9",
+        "name": "WebSocket listener to play audio through the browser ",
+        "info": "",
+        "x": 257.5,
+        "y": 479.75,
+        "wires": []
+    },
+    {
+        "id": "ffe87ec2.90616",
+        "type": "websocket-listener",
+        "z": "",
+        "path": "/ws/audio",
+        "wholemsg": "false"
+    }
+]
